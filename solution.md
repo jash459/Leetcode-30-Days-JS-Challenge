@@ -398,3 +398,36 @@ const curry = function(fn) {
  * csum(1)(2) // 3
  */
  ``` 
+
+11. Sleep
+[Question Link](https://leetcode.com/problems/sleep/?gio_link_id=5Rp2Wmzo)
+     
+    - Approach 
+      - let T=Date.now();
+      - Eat five Star and Do Nothing till currTime-T+1<Millis
+      - Once over , eturn anything.
+
+   - Time complexity: O(millis)
+   - Space complexity: O(1)
+
+```
+
+
+
+ Solution :/**
+ * @param {number} millis
+ */
+async function sleep(millis) {
+      let T=Date.now();
+      while(Date.now()-T+1<millis)
+      {   
+            //do nothing
+      }
+      return Promise.resolve({});
+}
+
+/** 
+ * let t = Date.now()
+ * sleep(100).then(() => console.log(Date.now() - t)) // 100
+ */
+ ``` 
