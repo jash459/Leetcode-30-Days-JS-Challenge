@@ -430,4 +430,98 @@ async function sleep(millis) {
  * let t = Date.now()
  * sleep(100).then(() => console.log(Date.now() - t)) // 100
  */
+ ```
+
+
+12. Promise Time Limit
+[Question Link](https://leetcode.com/problems/promise-time-limit/?gio_link_id=nombN5Z9)
+
+    - Intuition : The intuition behind this code is to enforce a time limit on a given function. It wraps the function in a new function that returns a promise. If the wrapped function exceeds the specified time limit, it rejects the promise with a "Time Limit Exceeded" error.
+     
+    - Approach 
+      - The timeLimit function takes two parameters: fn, which is the function to be time-limited, and t, which is the time limit in milliseconds.
+      - It returns an async function that accepts any number of arguments (...args) and returns a promise.
+      - Within the returned async function, a new promise is created to handle the time limit.
+      - A timeout is set using setTimeout, which will reject the promise after t milliseconds if it hasn't been resolved or rejected before that.
+      - The wrapped function (fn) is invoked with the provided arguments using await.
+      - If the wrapped function resolves successfully, the result is passed to resolve of the promise created in step 3.
+      - If an error occurs during the execution of the wrapped function, it is caught, and the promise is rejected with the error.
+      - Regardless of whether the wrapped function resolves or rejects, the timeout is cleared using clearTimeout to prevent it from triggering after the function has completed.
+      - The time-limited function returns the promise.
+
+   - Time complexity: The time complexity of this code is dependent on the time complexity of the wrapped function (fn). The time limit is enforced by setting a timeout, which doesn't affect the time complexity of the wrapped function itself. Therefore, the time complexity of the code can be considered the same as the time complexity of the wrapped function.
+
+  - Space complexity: The space complexity of this code is determined by the memory required to store the wrapped function and the promise. Since the wrapped function and promise are created within the returned function and not stored outside, the space complexity is minimal and mainly depends on the wrapped function and its internal operations.
+
+```
+ Solution :/**
+ * @param {Function} fn
+ * @param {number} t
+ * @return {Function}
+ */
+var timeLimit = function(fn, t) {
+  return async function(...args) {
+    return new Promise(async (resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject("Time Limit Exceeded");
+      }, t);
+
+      try {
+        const result = await fn(...args);
+        resolve(result);
+      } catch(err) {
+        reject(err);
+      }
+      clearTimeout(timeout);
+    });
+  };
+};
+/**
+ * const limited = timeLimit((t) => new Promise(res => setTimeout(res, t)), 100);
+ * limited(150).catch(console.log) // "Time Limit Exceeded" at t=100ms
+ */
+ ``` 
+
+
+13. Promise Time Limit
+[Question Link](https://leetcode.com/problems/promise-time-limit/?gio_link_id=nombN5Z9)
+
+    - Intuition : The given promisePool function executes an array of asynchronous functions in parallel up to a specified concurrency level (n). It uses recursion to evaluate the functions in a depth-first manner.
+     
+    - Approach 
+      - The promisePool function receives an array of asynchronous functions (functions) and a concurrency level (n).
+      - It defines an inner evaluateNext function that performs the evaluation of the functions.
+      - Within evaluateNext, the function checks if there are any functions remaining in the functions array. If not, it returns.
+      - If there are remaining functions, it removes the first function from the functions array and assigns it to fn.
+      - It then awaits the execution of fn() to ensure that the function completes before proceeding.
+      - After fn() completes, it recursively calls evaluateNext() to evaluate the next function in the array.
+      - The promisePool function creates an array of promises (nPromises) using Array(n).fill().map(evaluateNext) to initiate the parallel execution.
+      - It awaits the resolution of all promises in nPromises using Promise.all(nPromises) to ensure that all functions have been executed.
+
+   - Time complexity: The time complexity of the promisePool function depends on the number of functions (functions) and the concurrency level (n). The function uses recursion to evaluate the functions, and each function is executed once. Therefore, the time complexity is O(k), where k is the total number of functions in the functions array.
+
+   - Space complexity: The space complexity of the promisePool function is determined by the number of functions (functions) and the concurrency level (n). The function creates an array of promises (nPromises) to track the parallel execution, which requires space proportional to the concurrency level. Additionally, the recursion depth depends on the number of functions. Therefore, the space complexity is O(max(n, k)), where n is the concurrency level and k is the total number of functions.
+
+```
+ Solution :/**
+ * @param {Function[]} functions
+ * @param {number} n
+ * @return {Function}
+ */
+var promisePool = async function(functions, n) {
+    async function evaluateNext() {
+        if (functions.length === 0) return;
+        const fn = functions.shift();
+        await fn();
+        await evaluateNext();
+    }
+    const nPromises = Array(n).fill().map(evaluateNext);
+    await Promise.all(nPromises);
+};
+
+/**
+ * const sleep = (t) => new Promise(res => setTimeout(res, t));
+ * promisePool([() => sleep(500), () => sleep(400)], 1)
+ *   .then(console.log) // After 900ms
+ */
  ``` 
