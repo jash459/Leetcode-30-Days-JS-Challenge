@@ -525,3 +525,88 @@ var promisePool = async function(functions, n) {
  *   .then(console.log) // After 900ms
  */
  ``` 
+
+14. Promise Time Limit
+[Question Link](https://leetcode.com/problems/promise-time-limit/?gio_link_id=nombN5Z9)
+
+    - Intuition : To Store Key - Value Pair we will used Map.
+      - In order to delete particular key after it's duration is elasped, we will use setTimeout and let the javascript to handle this operation in Asychronous manner.
+    ```
+      setTimeout(()=>{
+      Cache.delete(key);
+     },duration)
+    ```
+     
+    - Approach 
+      1.  Create new Map object Cache inside TimieLimitedCache.
+      2. In set method if key is not present in Cache then
+        - const Id=setTimeout(()=>{ Cache.delete(key); },duration);
+        - Cache.set(key,{ value:value, ref:Id });
+        - We are storing Id in the Map because when we will have to update value of key in Map then we have to cancel setTimeout
+        method corresponding to this key and for that Id required.
+      3. If in set method key is there in map then we do following steps
+        - const Id=Cache.get(key).ref;
+        - clearTimeout(Id) //We are cancelling the prev setTimeout .
+        - Id=setTimeout(()=>{ Cache.delete(key); },duration);
+        - Cache.set(key,{ value:value, ref:Id });
+
+   - Time complexity: O(N)
+
+   - Space complexity: O(N)
+
+```
+ Solution :var TimeLimitedCache = function() {
+    this.Cache=new Map();
+};
+
+/** 
+ * @param {number} key
+ * @param {number} value
+ * @param {number} time until expiration in ms
+ * @return {boolean} if un-expired key already existed
+ */
+TimeLimitedCache.prototype.set = function(key, value, duration) {
+      let res=false;
+      if(this.Cache.has(key))
+      {
+         const ref=this.Cache.get(key).ref;
+         clearTimeout(ref);
+         res=true;
+      }
+       const ref=setTimeout(()=>{
+         this.Cache.delete(key);
+         },duration);
+         this.Cache.set(key,{
+               value:value,
+               ref:ref
+         });
+      return res;
+};
+
+/** 
+ * @param {number} key
+ * @return {number} value associated with key
+ */
+TimeLimitedCache.prototype.get = function(key) {
+    if(this.Cache.has(key))
+    {
+       return this.Cache.get(key).value;  
+    }
+    return -1;
+};
+
+/** 
+ * @return {number} count of non-expired keys
+ */
+TimeLimitedCache.prototype.count = function() {
+    return this.Cache.size;
+};
+
+/**
+ * Your TimeLimitedCache object will be instantiated and called as such:
+ * var obj = new TimeLimitedCache()
+ * obj.set(1, 42, 1000); // false
+ * obj.get(1) // 42
+ * obj.count() // 1
+ */
+ ```  
